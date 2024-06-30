@@ -1,0 +1,31 @@
+name: tool
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+  - bioconda
+dependencies:
+  - python=3.9
+  - biopython
+  - numpy<2.0
+  - tqdm
+  - cmake
+  - seaborn
+  - pytorch=2.2.2
+  - torchvision=0.17.2
+  - torchaudio=2.2.2
+  - pytorch-cuda=11.8
+  - mmseqs2
+  - hmmer
+  - prodigal
+  - ffindex
+  - pip
+  - pip:
+    - torch_geometric
+    - pyg_lib
+    - torch_scatter
+    - torch_sparse
+    - torch_cluster
+    - torch_spline_conv
+    - --find-links https://data.pyg.org/whl/torch-2.2.0+cu118.html
