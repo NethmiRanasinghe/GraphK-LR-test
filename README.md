@@ -1,7 +1,5 @@
 # GraphK-LR : Long-reads metagenomic bin refiner
 
-![GitHub](https://github.com/NethmiRanasinghe/GraphK-LR)
-
 ## Dependencies
 <!-- GraphK-LR is coded using C++ (v9+) and Python 3.9. To run GraphK-LR, you will need to install the following python and C++ modules. -->
 
@@ -41,7 +39,7 @@ conda env create -f env_cpu.yml
 To download GraphK-LR, you have to clone the GraphK-LR repository to your machine.
 
 ```
-git clone https://github.com/NethmiRanasinghe/GraphK-LR
+git clone https://github.com/NethmiRanasinghe/GraphK-LR.git
 ```
 
 ## Compiling the source code
@@ -54,7 +52,7 @@ sh build.sh
 ```    
 
 ## Test run data 
-Download dataset from [here](https://anu365-my.sharepoint.com/:u:/g/personal/u6776114_anu_edu_au/EZfR_olp6fxOpoKEexcm1ZABk1fTQTnW0-3ja772k22WbA?e=aoXr7N);
+Download dataset from [here](https://drive.google.com/file/d/1LXSCEKmnAjhw5hfzGcfQOe8P6-BJRDR9/view?usp=sharing);
 
 ```
 python main.py -r <path to fastq file> -i <path to initial tool results .txt file> -o <path to output folder> --resume
