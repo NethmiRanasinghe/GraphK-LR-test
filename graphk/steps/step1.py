@@ -90,13 +90,15 @@ def get_misbinned(in_file, initial_tool_results, output_folder):
     # clusters = read_tsv_to_clusters(initial_tool_results + 'contig_bins.tsv', total_reads)
 
     # 2) oblr
-    clusters = np.load(in_file)['classes']
+    # clusters = np.load(in_file)['classes']
 
     # 3) lrb
     # clusters = np.loadtxt(initial_tool_results + 'bins.txt', dtype=int) 
 
     # 4) metabcc
     # clusters = bins_to_npy(initial_tool_results + 'final.txt')
+    
+    clusters = np.load(in_file)
 
     # creating a dictionary with nodes as keys and neighbors as values
     graph = defaultdict(list)
@@ -155,8 +157,5 @@ def get_misbinned(in_file, initial_tool_results, output_folder):
     return mis_binned
 
 def run(in_file, exp_dir, out_dir):
-    print("Starting step 1 ...")
 
     get_misbinned(in_file, exp_dir, out_dir)
-
-    print("Step 1 completed!")

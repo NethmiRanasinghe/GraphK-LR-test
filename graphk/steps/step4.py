@@ -114,7 +114,6 @@ def predict_all(model, x, subgraph_loader):
 
 def get_graph_data(features, edges):
     edge_index = torch.tensor(edges, dtype=torch.long)
-    print(edge_index)
     data = Data(x=torch.tensor(features).float(),edge_index=edge_index.t().contiguous())
 
     return data
@@ -124,7 +123,6 @@ def get_train_data(read_cluster):
     # Extract indices where arr[index] == -1
     train_idx = np.where(read_cluster != -1)[0]
     train_idx = torch.LongTensor(train_idx)
-    print(train_idx.shape)
     
     y = torch.LongTensor(read_cluster)
 
@@ -134,8 +132,6 @@ def get_train_data(read_cluster):
 
 
 def run(exp_dir, out_dir, epochs):
-
-    print("Starting step 4 ...")
 
     out_dir = exp_dir + "/refined_output/"
     
@@ -147,13 +143,10 @@ def run(exp_dir, out_dir, epochs):
     edges = np.load(exp_dir +  '/edges.npy')
     features_vec = np.concatenate((comp, covg), axis=1)
     
-    print("data loaded ...")
-    
     out_file = out_dir + 'final_refined_bins.tsv'       
 
     # create dataset
     data = get_graph_data(features_vec, edges)
-    print(data)
     train_idx, y, no_classes = get_train_data(read_cluster)
 
     # sampler for training
@@ -203,19 +196,13 @@ def run(exp_dir, out_dir, epochs):
             print('Early stopping, loss less than 0.05')
             break
 
-    # final result
+    # Load the original read IDs
+    with open(exp_dir+'/reads_original_ids', 'r') as f:
+        original_read_ids = f.read().splitlines()
+
     idx, preds = predict_all(model, x, subgraph_loader)
     classes = torch.argmax(preds, axis=1)
-
     classes_np = classes.numpy()
-
-    # Convert idx to string and add "read_" prefix
-    read_ids = np.core.defchararray.add('read_', (idx + 1).astype(str))
-
-    # Combine read_ids and classes_np into a single 2D array
-    data = np.column_stack((read_ids, classes_np))
-
-    # Save the data to the output file
-    np.savetxt(out_file, data, fmt='%s\t%s', delimiter='\n')
-
-    print("Succesfully completed!")
+    
+    # Save the predictions to the output file
+    np.savetxt(out_file, classes_np, fmt='%s', delimiter='\n')

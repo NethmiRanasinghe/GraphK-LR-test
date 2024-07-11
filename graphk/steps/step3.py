@@ -34,8 +34,8 @@ def get_bins_for_connected_vertices(connected_vertices_info, ambigous_vertices, 
 
 def update_bin(new_classes_file, vertices_info, classes):
     for ref_vertex in vertices_info:
-        if (classes[ref_vertex] != vertices_info[ref_vertex]['bin']):
-            print("Mis match found. Label updating for node: ", ref_vertex)
+        #if (classes[ref_vertex] != vertices_info[ref_vertex]['bin']):
+            #print("Mis match found. Label updating for node: ", ref_vertex)
         classes[ref_vertex] = vertices_info[ref_vertex]['bin']
 
     np.savez(new_classes_file, classes=classes)
@@ -107,10 +107,8 @@ def annotate_bins(exp_dir, out_dir):
 
 def run(exp_dir, out_dir):
     try:
-        print("Starting step 3 ...")
         annotate_bins(exp_dir, out_dir)
-        print("Step 3 completed!")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error step 3: {e}")
 
     
