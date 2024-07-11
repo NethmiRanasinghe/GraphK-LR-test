@@ -30,8 +30,9 @@ def main():
     parser.add_argument('-o', '--exp_dir', type=str, help='Path to the output directory')
     parser.add_argument('-i', '--in_file', type=str, help='Path to the input file of inial binning results')
     parser.add_argument('-r', '--fastq_file', type=str, help='Path to the original reads file (fastq)')
-    parser.add_argument('-e', '--epochs', type=int, help='Number of epochs')
+    parser.add_argument('-e', '--epochs', type=int, default=100, help='Number of epochs (default: 100)')
     parser.add_argument('--resume', action='store_true', help='Resume the program from previous checkpoints')
+    parser.add_argument('-g', '--groundtruth', type=str, help='Groundtruth file if available')
 
     args = parser.parse_args()
 
