@@ -5,6 +5,7 @@ import subprocess
 from Bio import SeqIO
 import numpy as np
 from .steps import step1, step2, step3, step4
+from .support import evaluate
 
 logger = logging.getLogger('GraphKLR')
 
@@ -46,7 +47,9 @@ class Checkpointer():
         return str(self.completed)
 
 # Define the directory where binaries are installed
-BIN_DIR = os.path.join('bin')
+# BIN_DIR = os.path.join('bin')
+BIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin')
+OBLR_UTILS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'oblr_utils')
 
 def rename_reads(exp_dir, fastq_file):
     seqtk_path = os.path.join(BIN_DIR, 'seqtk')
@@ -54,19 +57,24 @@ def rename_reads(exp_dir, fastq_file):
 
 def obtain_read_ids(exp_dir):
     subprocess.run(f"grep '>' {exp_dir}/reads.fasta > {exp_dir}/read_ids", shell=True, check=True)
-
+    
+    
 def run_seq2vec(exp_dir):
     seq2vec_path = os.path.join(BIN_DIR, 'seq2vec')
     subprocess.run(f"{seq2vec_path} -k 4 -o {exp_dir}/4mers -f {exp_dir}/reads.fasta", shell=True, check=True)
+    
 
 def run_seq2covvec(exp_dir, fastq_file):
     subprocess.run(f"python {BIN_DIR}/seq2covvec/seq2covvec.py -k 16 -o {exp_dir}/16mers -r {fastq_file}", shell=True, check=True)
+    
 
 def create_overlaps(exp_dir):
-    subprocess.run(f"bash ./graphk/oblr_utils/buildgraph_with_chunks.sh -r {exp_dir}/reads.fasta -c 250000 -o {exp_dir}/", shell=True, check=True)
+    subprocess.run(f"bash {OBLR_UTILS_DIR}/buildgraph_with_chunks.sh -r {exp_dir}/reads.fasta -c 250000 -o {exp_dir}/", shell=True, check=True)
+    
 
 def run_step1(in_file, exp_dir, out_dir):
     step1.run(in_file, exp_dir, out_dir)
+    
     
 def run_step2(exp_dir, out_dir):
     step2.run(exp_dir, out_dir)
@@ -74,5 +82,9 @@ def run_step2(exp_dir, out_dir):
 def run_step3(exp_dir, out_dir):
     step3.run(exp_dir, out_dir)
 
-def run_step4(exp_dir, out_dir, epochs):
+def run_step4(exp_dir, out_dir, epochs, fastq_file):
+    # subprocess.run(f"awk 'NR%4==1 {{print substr($1,2)}}' {fastq_file} > {exp_dir}/reads_original_ids", shell=True, check=True)
     step4.run(exp_dir, out_dir, epochs)
+    
+def run_eval(out_dir, groundtruth,):
+    evaluate.run(out_dir, groundtruth)

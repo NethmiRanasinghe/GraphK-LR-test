@@ -48,7 +48,8 @@ for chunk in $exp/chunked_reads/*.chunk.fasta # change the folder name to where 
 do
 echo "Processing chunk " $i
 
-./bin/kbm2 -q  -i $reads -d $chunk -n 2000 -l 2560 -t 32 | python $(dirname $0)/filter_alignments.py $exp/chunked_reads/ $i.
+
+$(dirname $0)/../../bin/kbm2 -q  -i $reads -d $chunk -n 2000 -l 2560 -t 32 | python $(dirname $0)/filter_alignments.py $exp/chunked_reads/ $i.
 # kbm2 -q  -i $reads -d $chunk -n 2000 -l 1024 -t 32 | python $(dirname $0)/filter_alignments.py $exp/chunked_reads/ $i.
 i=$((++i))
 done;
