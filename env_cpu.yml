@@ -2,6 +2,7 @@ name: toolcpu
 channels:
   - pytorch
   - conda-forge
+  - bioconda
   - defaults
 dependencies:
   - python=3.9
@@ -16,8 +17,11 @@ dependencies:
   - cpuonly
   - mmseqs2
   - hmmer
+  - prodigal
+  - ffindex
   - pip
   - pip:
+    - tabulate
     - torch_geometric
     - pyg_lib
     - torch_scatter
