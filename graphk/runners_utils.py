@@ -5,7 +5,7 @@ import subprocess
 from Bio import SeqIO
 import numpy as np
 from .steps import step1, step2, step3, step4
-from .support import evaluate
+#from .support import evaluate
 
 logger = logging.getLogger('GraphKLR')
 
@@ -84,7 +84,7 @@ def run_step2(exp_dir, out_dir):
 def run_step3(exp_dir, out_dir):
     step3.run(exp_dir, out_dir)
 
-def run_step4(exp_dir, out_dir, epochs, fastq_file):
+def run_step4(exp_dir, out_dir, epochs):
     # subprocess.run(f"awk 'NR%4==1 {{print substr($1,2)}}' {fastq_file} > {exp_dir}/reads_original_ids", shell=True, check=True)
     step4.run(exp_dir, out_dir, epochs)
     

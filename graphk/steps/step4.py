@@ -136,7 +136,7 @@ def run(exp_dir, out_dir, epochs):
     out_dir = exp_dir + "/refined_output/"
     
     comp = pd.read_csv(exp_dir + "/4mers", delimiter=',', header=None).to_numpy()
-    covg = pd.read_csv(exp_dir + "/16mers", delimiter=' ', header=None).to_numpy() 
+    covg = pd.read_csv(exp_dir + "/16mers/kmers.vectors", delimiter=' ', header=None).to_numpy() 
     
     updated_clusters = np.load(out_dir + 'refined_classes.npz')
     read_cluster = updated_clusters['classes'] 
