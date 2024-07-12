@@ -184,21 +184,18 @@ def run(exp_dir, out_dir, epochs):
     losses = []
     prev_loss = 100
 
-    for epoch in range(1, epochs+1):
+    for epoch in tqdm(range(1, epochs + 1), desc='Training', unit='epoch'):
         loss = train(model, x, y, optimizer, train_loader, device)
-        dloss = prev_loss-loss
+        dloss = prev_loss - loss
         prev_loss = loss
         losses.append(loss)
-
-        print(f'Epoch {epoch:02d}, Loss: {loss:.4f}')
+    
+        tqdm.write(f'Epoch {epoch:02d}, Loss: {loss:.4f}')
 
         if loss < 0.05:
-            print('Early stopping, loss less than 0.05')
+            tqdm.write('Early stopping, loss less than 0.05')
             break
 
-    # Load the original read IDs
-    with open(exp_dir+'/reads_original_ids', 'r') as f:
-        original_read_ids = f.read().splitlines()
 
     idx, preds = predict_all(model, x, subgraph_loader)
     classes = torch.argmax(preds, axis=1)
