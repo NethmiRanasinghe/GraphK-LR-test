@@ -19,6 +19,7 @@ dependencies:
   - mmseqs2
   - hmmer
   - prodigal
+  - kmertools
   - ffindex
   - pip
   - pip:
