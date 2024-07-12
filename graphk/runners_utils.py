@@ -60,12 +60,14 @@ def obtain_read_ids(exp_dir):
     
     
 def run_seq2vec(exp_dir):
-    seq2vec_path = os.path.join(BIN_DIR, 'seq2vec')
-    subprocess.run(f"{seq2vec_path} -k 4 -o {exp_dir}/4mers -f {exp_dir}/reads.fasta", shell=True, check=True)
+    #seq2vec_path = os.path.join(BIN_DIR, 'seq2vec')
+    #subprocess.run(f"{seq2vec_path} -k 4 -o {exp_dir}/4mers -f {exp_dir}/reads.fasta", shell=True, check=True)
+    subprocess.run(f"kmertools comp oligo -p csv -i {exp_dir}/reads.fasta -o {exp_dir}/4mers -k 4", shell=True, check=True)
     
 
 def run_seq2covvec(exp_dir, fastq_file):
-    subprocess.run(f"python {BIN_DIR}/seq2covvec/seq2covvec.py -k 16 -o {exp_dir}/16mers -r {fastq_file}", shell=True, check=True)
+    #subprocess.run(f"python {BIN_DIR}/seq2covvec/seq2covvec.py -k 16 -o {exp_dir}/16mers -r {fastq_file}", shell=True, check=True)
+    subprocess.run(f"kmertools cov -s 10 -c 32 -t 8 -i {fastq_file} -o {exp_dir}/16mers -k 16", shell=True, check=True)
     
 
 def create_overlaps(exp_dir):
