@@ -31,17 +31,17 @@ mv seqtk/seqtk bin/ || check_success "moving seqtk"
 rm -rf seqtk
 
 # Install and build seq2vec
-[ -d seq2vec ] && rm -rf seq2vec
-git clone https://github.com/anuradhawick/seq2vec.git
-(cd seq2vec && sh build.sh) || check_success "seq2vec build"
-mv seq2vec/build/seq2vec bin/ || check_success "moving seq2vec"
+#[ -d seq2vec ] && rm -rf seq2vec
+#git clone https://github.com/anuradhawick/seq2vec.git
+#(cd seq2vec && sh build.sh) || check_success "seq2vec build"
+#mv seq2vec/build/seq2vec bin/ || check_success "moving seq2vec"
 #rm -rf seq2vec
 
 # Install and build seq2covvec
-[ -d seq2covvec ] && rm -rf seq2covvec
-cd bin
-git clone https://github.com/anuradhawick/seq2covvec.git
-(cd seq2covvec && sh build.sh) || check_success "seq2covvec build"
+#[ -d seq2covvec ] && rm -rf seq2covvec
+#cd bin
+#git clone https://github.com/anuradhawick/seq2covvec.git
+#(cd seq2covvec && sh build.sh) || check_success "seq2covvec build"
 cd $cpath
 
 case $1 in
