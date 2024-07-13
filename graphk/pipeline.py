@@ -136,11 +136,11 @@ def run_pipeline(args):
 
     # run_step4
     stage = "4_2"
-    stage_params = [exp_dir, out_dir, epochs, fastq_file]
+    stage_params = [exp_dir, out_dir, epochs]
 
     if checkpoint.should_run_step(stage, stage_params):
         logger.info("Running step 4")
-        run_step4(exp_dir, out_dir, epochs, fastq_file)
+        run_step4(exp_dir, out_dir, epochs)
         
         checkpoint.log(stage, stage_params)
         logger.info("Running step 4 complete")
