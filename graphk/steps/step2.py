@@ -9,19 +9,21 @@ def get_file_name_without_extension(file_path):
     file_name, _ = os.path.splitext(file_name_with_extension)
     return file_name
 
-def generate_gene_faa_file(fasta_file, out_dir):
+def generate_gene_faa_file(fasta_file, out_dir, exp_dir):
     gene_file = f"{out_dir}/fasta_reads_genes.faa"
-    fragCmd = (f"prodigal -i {fasta_file} -a {gene_file}")
+    fragCmd = (f"prodigal -i {fasta_file} -a {gene_file} 1> {exp_dir}/prodigalResult.out 2> {exp_dir}/prodigalResult.err")
+    print("Prodigal started generating gene file...")
     logger.debug(f"exec cmd: {fragCmd}")
     os.system(fragCmd)
     return gene_file
     
-def generate_hmmout_file(gene_file, out_dir, marker_files, kingdoms):
+def generate_hmmout_file(gene_file, out_dir, marker_files, kingdoms, exp_dir):
     
     hmmout_file_list = []
     for marker, kingdom in zip(marker_files, kingdoms):
         hmmout_file = f"{out_dir}/{kingdom}.hmmout"
-        hmmCmd = (f"hmmsearch --domtblout {hmmout_file} {marker} {gene_file}")
+        hmmCmd = (f"hmmsearch --domtblout {hmmout_file} {marker} {gene_file} 1> {exp_dir}/hmmsearchResult.out 2> {exp_dir}/hmmsearchResult.err")
+        print(f"HMMER started hmmsearch...{kingdom}")
         logger.debug(f"exec cmd: {hmmCmd}")
         os.system(hmmCmd)
         hmmout_file_list.append(hmmout_file)
@@ -29,7 +31,7 @@ def generate_hmmout_file(gene_file, out_dir, marker_files, kingdoms):
 
 # ---------------------------------------------MMSEQS2----------------------------------------------
 
-def generate_phrog_db(out_dir):
+def generate_phrog_db(out_dir,exp_dir):
     file_path = "phrog_db/phrogdb"
     mkdir_cmd = (f"mkdir phrog_db")
     logger.debug(f"exec cmd: {mkdir_cmd}")
@@ -37,13 +39,17 @@ def generate_phrog_db(out_dir):
     dw_hmm_cmd = (f"wget https://phrogs.lmge.uca.fr/downloads_from_website/HMM_phrog.tar.gz")
     logger.debug(f"exec cmd: {dw_hmm_cmd}")
     os.system(dw_hmm_cmd)
-    open_cmd = (f"tar -xvf HMM_phrog.tar.gz")
+    open_cmd = (f"tar -xvf HMM_phrog.tar.gz 1> {exp_dir}/unzip.out 2> {exp_dir}/unzip.err")
     logger.debug(f"exec cmd: {open_cmd}")
     os.system(open_cmd)
-    create_db_cmd = (f"ffindex_build -a phrog_hhm_db phrog_hhm_db.index HMM_phrog/")
+    rm_unzip_logs = (f"rm {exp_dir}/unzip.out {exp_dir}/unzip.err")
+    logger.debug(f"exec cmd: {rm_unzip_logs}")
+    os.system(rm_unzip_logs)
+    print("Generating PHROG DB...")
+    create_db_cmd = (f"ffindex_build -a phrog_hhm_db phrog_hhm_db.index HMM_phrog/ 1> {exp_dir}/ffindexResult.out 2> {exp_dir}/ffindexResult.err")
     logger.debug(f"exec cmd: {create_db_cmd}")
     os.system(create_db_cmd)
-    con_db_cmd = (f"mmseqs convertprofiledb phrog_hhm_db phrog_db/phrogdb")
+    con_db_cmd = (f"mmseqs convertprofiledb phrog_hhm_db phrog_db/phrogdb 1> {exp_dir}/convertprofiledb.out 2> {exp_dir}/convertprofiledb.err")
     logger.debug(f"exec cmd: {con_db_cmd}")
     os.system(con_db_cmd)
     mv_dir = (f"mv phrog_db {out_dir}")
@@ -58,14 +64,15 @@ def generate_phrog_db(out_dir):
     
     return file_path
 
-def generate_vog_db(out_dir):
+def generate_vog_db(out_dir,exp_dir):
     file_path = f"{out_dir}/vog_db/vogdb"
     mkdir_cmd = (f"mkdir {out_dir}/vog_db")
     logger.debug(f"exec cmd: {mkdir_cmd}")
     os.system(mkdir_cmd)
     
-    query_db_cmd = (f"mmseqs databases VOGDB {file_path} tmp")
+    query_db_cmd = (f"mmseqs databases VOGDB {file_path} tmp 1> {exp_dir}/vogdbsetup.out 2> {exp_dir}/vogdbsetup.err")
     logger.debug(f"exec cmd: {query_db_cmd}")
+    print("Generating VOG DB...")
     os.system(query_db_cmd)
     
     rm_dir_cmd = (f"rm -r tmp")
@@ -74,33 +81,35 @@ def generate_vog_db(out_dir):
     
     return file_path
 
-def generate_fungi_db(out_dir):
+def generate_fungi_db(out_dir,exp_dir):
     file_path = f"{out_dir}/fungi_db/fungidb"
     
     mkdir_cmd = (f"mkdir {out_dir}/fungi_db")
     logger.debug(f"exec cmd: {mkdir_cmd}")
     os.system(mkdir_cmd)
     
-    create_tdb_cmd = (f" mmseqs createdb graphk/fungi_seq_markers.fa {file_path}")
+    create_tdb_cmd = (f" mmseqs createdb graphk/fungi_seq_markers.fa {file_path} 1> {exp_dir}/fungidbsetup.out 2> {exp_dir}/fungidbsetup.err")
     logger.debug(f"exec cmd: {create_tdb_cmd}")
+    print("Generating Fungi DB...")
     os.system(create_tdb_cmd)
     
     return file_path
 
-def generate_query_db(gene_file, out_dir):
+def generate_query_db(gene_file, out_dir,exp_dir):
     
     query_db = f"{out_dir}/query_db/querydb"
     mkdir_cmd = (f"mkdir {out_dir}/query_db")
     logger.debug(f"exec cmd: {mkdir_cmd}")
     os.system(mkdir_cmd)
     
-    query_db_cmd = (f"mmseqs createdb {gene_file} {query_db}")
+    query_db_cmd = (f"mmseqs createdb {gene_file} {query_db} 1> {exp_dir}/querydbsetup.out 2> {exp_dir}/querydbsetup.err")
+    print("Generating Query DB...")
     logger.debug(f"exec cmd: {query_db_cmd}")
     os.system(query_db_cmd)
     
     return query_db
 
-def generate_mmseqs_result(query_db, out_dir, profile_databases, mmseqs2_kingdoms):
+def generate_mmseqs_result(query_db, out_dir, profile_databases, mmseqs2_kingdoms,exp_dir):
     
     create_output_dir = (f"mkdir {out_dir}/mmseqs2_files")
     logger.debug(f"exec cmd: {create_output_dir}")
@@ -116,7 +125,8 @@ def generate_mmseqs_result(query_db, out_dir, profile_databases, mmseqs2_kingdom
             
         final_file_name = f"{kingdom}"
         
-        mmseq_search_cmd = (f"mmseqs search {query_db} {profile_db} {out_dir}/mmseqs2_files/{final_file_name} {out_dir}/tmp_{final_file_name} --threads 8 {exhaustive_search}")
+        mmseq_search_cmd = (f"mmseqs search {query_db} {profile_db} {out_dir}/mmseqs2_files/{final_file_name} {out_dir}/tmp_{final_file_name} --threads 8 {exhaustive_search} 1> {exp_dir}/mmseqs2search.out 2> {exp_dir}/mmseqs2search.err")
+        print(f"MMseqs2 started searching... {kingdom}")
         logger.debug(f"exec cmd: {mmseq_search_cmd}")
         os.system(mmseq_search_cmd)
         
@@ -124,7 +134,7 @@ def generate_mmseqs_result(query_db, out_dir, profile_databases, mmseqs2_kingdom
         logger.debug(f"exec cmd: {final_db_file}")
         os.system(final_db_file)    
         
-        convertalist = (f"mmseqs convertalis {query_db} {profile_db} {out_dir}/mmseqs2_files/{final_file_name} {out_dir}/mmseqs2_files/{final_file_name}.tab --format-output query,target,evalue,gapopen,pident,fident,nident,qstart,qend,qlen,tstart,tend,tlen,alnlen")
+        convertalist = (f"mmseqs convertalis {query_db} {profile_db} {out_dir}/mmseqs2_files/{final_file_name} {out_dir}/mmseqs2_files/{final_file_name}.tab --format-output query,target,evalue,gapopen,pident,fident,nident,qstart,qend,qlen,tstart,tend,tlen,alnlen 1> {exp_dir}/converttab.out 2> {exp_dir}/converttab.err")
         logger.debug(f"exec cmd: {convertalist}")
         os.system(convertalist)
         
@@ -199,9 +209,9 @@ def process_mmseqs_file(filenames, score_data, threshold):
 
 def generate_marker_scores(exp_dir, out_dir):
     
-    generate_phrog_db(out_dir)
-    generate_vog_db(out_dir)
-    generate_fungi_db(out_dir)
+    generate_phrog_db(out_dir,exp_dir)
+    generate_vog_db(out_dir,exp_dir)
+    generate_fungi_db(out_dir,exp_dir)
     
     # profile_databases = [f"{out_dir}/phrog_db/phrogdb", f"{out_dir}/vog_db/vogdb", f"{out_dir}/fungi_db/fungidb"]
     profile_databases = [f"{out_dir}/vog_db/vogdb", f"{out_dir}/fungi_db/fungidb"]
@@ -213,17 +223,17 @@ def generate_marker_scores(exp_dir, out_dir):
     
     read_file = f"{exp_dir}/reads.fasta"
     
-    gene_file = generate_gene_faa_file(read_file, out_dir)
+    gene_file = generate_gene_faa_file(read_file, out_dir,exp_dir)
 
 
     score_data = {}
     
-    query_db = generate_query_db(gene_file, out_dir)
-    hmmout_files = generate_hmmout_file( gene_file,out_dir, marker_files, marker_kingdoms)
+    query_db = generate_query_db(gene_file, out_dir,exp_dir)
+    hmmout_files = generate_hmmout_file( gene_file,out_dir, marker_files, marker_kingdoms,exp_dir)
     # threshold = 50
     process_hmmout_file(hmmout_files, score_data, 50)
     
-    resultdb_files = generate_mmseqs_result(query_db,out_dir, profile_databases, mmseqs2_kingdoms)
+    resultdb_files = generate_mmseqs_result(query_db,out_dir, profile_databases, mmseqs2_kingdoms,exp_dir)
     process_mmseqs_file(resultdb_files, score_data, 50)
     
     output_file_path = f"{out_dir}/marker_scores.txt"
