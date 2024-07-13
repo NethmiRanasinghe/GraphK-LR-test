@@ -11,6 +11,7 @@ def run_pipeline(args):
     fastq_file = args.fastq_file
     epochs = args.epochs
     resume = args.resume
+    groundtruth = args.groundtruth
 
     # Ensure the experiment directory exists
     os.makedirs(exp_dir, exist_ok=True)
@@ -90,19 +91,21 @@ def run_pipeline(args):
         logger.info("Creating overlaps complete")
     else:
         logger.info("Overlaps already created")
-
+        
+        
     # run_step1
     stage = "2_1"
     stage_params = [in_file, exp_dir, out_dir]
 
     if checkpoint.should_run_step(stage, stage_params):
-        logger.info("Running step 1")
-        run_step1(in_file, exp_dir, out_dir)
+        logger.info("Running step 1 ")
+        run_step1and3(in_file, exp_dir, out_dir)
         
         checkpoint.log(stage, stage_params)
         logger.info("Running step 1 complete")
     else:
         logger.info("Step1 already executed")
+        
 
     # run_step2
     stage = "2_2"
@@ -117,18 +120,6 @@ def run_pipeline(args):
     else:
         logger.info("Step2 already executed")
 
-    # run_step3
-    stage = "3_1"
-    stage_params = [exp_dir, out_dir]
-
-    if checkpoint.should_run_step(stage, stage_params):
-        logger.info("Running step 3")
-        run_step3(exp_dir, out_dir)
-        
-        checkpoint.log(stage, stage_params)
-        logger.info("Running step 3 complete")
-    else:
-        logger.info("Step3 already executed")
 
     # run_seq2covvec
     stage = "4_1"
@@ -145,16 +136,32 @@ def run_pipeline(args):
 
     # run_step4
     stage = "4_2"
-    stage_params = [exp_dir, out_dir, epochs]
+    stage_params = [exp_dir, out_dir, epochs, fastq_file]
 
     if checkpoint.should_run_step(stage, stage_params):
         logger.info("Running step 4")
-        run_step4(exp_dir, out_dir, epochs)
+        run_step4(exp_dir, out_dir, epochs, fastq_file)
         
         checkpoint.log(stage, stage_params)
         logger.info("Running step 4 complete")
     else:
         logger.info("step 4 already executed")
+        
+    # run_step4
+    if (groundtruth != None):
+      stage = "5_1"
+      stage_params = [out_dir, groundtruth, fastq_file]
+
+      if checkpoint.should_run_step(stage, stage_params):
+          logger.info("Evaluating Results ... ")
+          run_eval(out_dir, groundtruth, fastq_file)
+        
+          checkpoint.log(stage, stage_params)
+          logger.info("Evaluation complete")
+      else:
+          logger.info("Evaluation already executed")
+    else:
+          logger.info("Groundtruth file not provided")
 
     # Todo - Check output files
 

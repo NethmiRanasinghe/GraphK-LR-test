@@ -4,8 +4,8 @@ import logging
 import subprocess
 from Bio import SeqIO
 import numpy as np
-from .steps import step1, step2, step3, step4
-#from .support import evaluate
+from .steps import step1, step2, step3, step4, step1and3, step1test, step3test
+from .support import evaluate
 
 logger = logging.getLogger('GraphKLR')
 
@@ -51,9 +51,10 @@ class Checkpointer():
 BIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin')
 OBLR_UTILS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'oblr_utils')
 
-def rename_reads(exp_dir, fastq_file):
+def rename_reads(exp_dir, fastq_file):    
     seqtk_path = os.path.join(BIN_DIR, 'seqtk')
-    subprocess.run(f"{seqtk_path} rename {fastq_file} read_ | {seqtk_path} seq -A > {exp_dir}/reads.fasta", shell=True, check=True)
+    subprocess.run(f"{seqtk_path} seq -A {fastq_file} | {seqtk_path} rename - read_ > {exp_dir}/reads.fasta", shell=True, check=True)
+
 
 def obtain_read_ids(exp_dir):
     subprocess.run(f"grep '>' {exp_dir}/reads.fasta > {exp_dir}/read_ids", shell=True, check=True)
@@ -73,20 +74,20 @@ def run_seq2covvec(exp_dir, fastq_file):
 def create_overlaps(exp_dir):
     subprocess.run(f"bash {OBLR_UTILS_DIR}/buildgraph_with_chunks.sh -r {exp_dir}/reads.fasta -c 250000 -o {exp_dir}/", shell=True, check=True)
     
-
-def run_step1(in_file, exp_dir, out_dir):
-    step1.run(in_file, exp_dir, out_dir)
+    
+def run_step1and3(in_file, exp_dir, out_dir):
+    step1and3.run(in_file, exp_dir, out_dir)
     
     
 def run_step2(exp_dir, out_dir):
     step2.run(exp_dir, out_dir)
 
-def run_step3(exp_dir, out_dir):
-    step3.run(exp_dir, out_dir)
+
 
 def run_step4(exp_dir, out_dir, epochs):
-    # subprocess.run(f"awk 'NR%4==1 {{print substr($1,2)}}' {fastq_file} > {exp_dir}/reads_original_ids", shell=True, check=True)
+    #subprocess.run(f"awk 'NR%4==1 {{print substr($1,2)}}' {fastq_file} > {exp_dir}/reads_original_ids", shell=True, check=True)
     step4.run(exp_dir, out_dir, epochs)
     
-def run_eval(out_dir, groundtruth,):
-    evaluate.run(out_dir, groundtruth)
+    
+def run_eval(out_dir, groundtruth, fastq_file):
+    evaluate.run(out_dir, groundtruth, fastq_file)
