@@ -74,16 +74,14 @@ def bfs_label_scores(graph, clusters, start_node):
     return label_scores
 
 def get_misbinned(in_file, initial_tool_results, output_folder):
-    print(output_folder)
 
     # Load the edges
     edges = create_edges(initial_tool_results)
 
     mis_binned = []
 
-    result = subprocess.run(['wc', '-l', initial_tool_results+'/read_ids'], capture_output=True, text=True)
-    total_reads = int(result.stdout.split()[0])
-    print(total_reads)
+    #result = subprocess.run(['wc', '-l', initial_tool_results+'/read_ids'], capture_output=True, text=True)
+    #total_reads = int(result.stdout.split()[0])
 
     # load the bins
     # 1) semibin2

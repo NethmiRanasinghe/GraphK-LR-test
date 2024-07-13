@@ -3,37 +3,43 @@ import sys
 import numpy as np
 import subprocess
 from Bio import SeqIO
+from collections import defaultdict
 
-def read_tsv_to_clusters(tsv_file, fastq_file):
+def read_tsv_to_clusters(tsv_file, sequence_file):
+    # Determine file format
+    file_format = "fasta" if sequence_file.endswith(('.fasta', '.fa')) else "fastq"
 
-    total_reads = subprocess.run(
-            f"cat {fastq_file} | wc -l | awk '{{print $1/4}}'",
-            shell=True,
-            capture_output=True,
-            text=True,
-            check=True
-        )
-    
-    # fastq_handle = open(fastq_file, 'r')
-    # total_reads = sum(1 for _ in SeqIO.parse(fastq_handle, "fastq"))
-    # fastq_handle.seek(0)  # Reset file pointer to the beginning
-    
-    # Initialize the clusters array with -1
-    clusters = np.full(total_reads, -1, dtype=int)
+    # Count total reads
+    if file_format == "fastq":
+        count_command = f"grep -c '^@' {sequence_file}"
+    else:  # fasta
+        count_command = f"grep -c '^>' {sequence_file}"
 
+    total_sequences = int(subprocess.run(
+        count_command,
+        shell=True,
+        capture_output=True,
+        text=True,
+        check=True
+    ).stdout.strip())
+
+    # Initialize the clusters array
+    clusters = np.full(total_sequences, -1, dtype=int)
+
+    # Read TSV file
     readId_bin_dict = {}
-
     with open(tsv_file, 'r') as file:
-            file.readline()
-            for line in file:
-                read_id, bin = line.strip().split('\t')
-                readId_bin_dict[read_id] = bin
+        next(file)  # Skip header
+        for line in file:
+            read_id, bin_str = line.strip().split('\t')
+            bin_index = int(bin_str)
+            readId_bin_dict[read_id] = bin_index
 
-    i = 0
-    for record in SeqIO.parse(fastq_file, "fastq"):
+
+    # Process sequence file
+    for i, record in enumerate(SeqIO.parse(sequence_file, file_format)):
         if record.id in readId_bin_dict:
-            clusters[i] = bin
-            i += 1   
+            clusters[i] = readId_bin_dict[record.id]
 
     return clusters
 
@@ -53,9 +59,7 @@ def bins_to_npy(filename):
 
 def other_function():
     # Other function implementation
-    print("""This parser does not support for other tools.
-          Please convert the results file into a .npy file with respective bin of each seq in order of the original reads file.
-          Bin number should start from 0. """)
+    print("""The name of the binning tool is unrecongnized. Please enter one of these - oblr, lrbinner, metabcclr, semibin2""")
     
 
     exit()
@@ -63,46 +67,35 @@ def other_function():
 
 def main():
     parser = argparse.ArgumentParser(description="Binning tool processing script")
-    parser.add_argument("initial_tool_results", help="Path to the input txt file")
-    parser.add_argument("fastq_file", help="Path to the input fastq file")
-    parser.add_argument("out_folder", help="Path to the output folder")
+    parser.add_argument("-i", "--initial_tool_results", help="Path to the initial binning results file")
+    parser.add_argument("-r", "--reads_file", help="Path to the reads file (fastq, fasta)")
+    parser.add_argument("-o", "--out_folder", help="Path to the output folder")
+    parser.add_argument("-t", "--binning_tool", help="Name of the binning tool used (oblr, lrbinner, metabcclr, semibin2)")
     args = parser.parse_args()
 
-    print("Which tool did you use for initial binning?")
-    print("1) OBLR")
-    print("2) LRBinner")
-    print("3) MetaBCC")
-    print("4) semibin2")
-    print("5) other")
+            
+    tool = args.binning_tool
 
-    while True:
-        try:
-            choice = int(input("Enter your choice (1-5): "))
-            if 1 <= choice <= 5:
-                break
-            else:
-                print("Please enter a number between 1 and 5.")
-        except ValueError:
-            print("Please enter a valid number.")
-
-    if choice == 1:
+    if tool == "oblr":
         clusters = np.load(args.initial_tool_results)['classes']
         np.save(args.out_folder + '/initial_bins.npy', clusters)
         
-    elif choice == 2:
+    elif tool == "lrbinner":
         clusters = np.loadtxt(args.initial_tool_results, dtype=int) 
-        np.save(args.out_folder + 'initial_bins.npy', clusters)
+        np.save(args.out_folder + '/initial_bins.npy', clusters)
 
-    elif choice == 3:
+    elif tool == "metabcclr":
         clusters = bins_to_npy(args.initial_tool_results)
-        np.save(args.out_folder + 'initial_bins.npy', clusters)
+        np.save(args.out_folder + '/initial_bins.npy', clusters)
 
-    elif choice == 4:
+    elif tool == "semibin2":
         clusters = read_tsv_to_clusters(args.initial_tool_results, args.fastq_file)
-        np.save(args.out_folder + 'initial_bins.npy', clusters)
+        np.save(args.out_folder + '/initial_bins.npy', clusters)
 
     else:
         other_function()
+        
+    print(f'Results parsed succesfully! You can find the results at {args.out_folder}/initial_bins.npy')
 
 if __name__ == "__main__":
     main()
