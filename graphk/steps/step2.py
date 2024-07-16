@@ -125,7 +125,7 @@ def generate_mmseqs_result(query_db, out_dir, profile_databases, mmseqs2_kingdom
             
         final_file_name = f"{kingdom}"
         
-        mmseq_search_cmd = (f"mmseqs search {query_db} {profile_db} {out_dir}/mmseqs2_files/{final_file_name} {out_dir}/tmp_{final_file_name} --threads 8 {exhaustive_search} 1> {exp_dir}/mmseqs2search.out 2> {exp_dir}/mmseqs2search.err")
+        mmseq_search_cmd = (f"mmseqs search {query_db} {profile_db} {out_dir}/mmseqs2_files/{final_file_name} {out_dir}/tmp_{final_file_name} --threads 16 {exhaustive_search} 1> {exp_dir}/mmseqs2search.out 2> {exp_dir}/mmseqs2search.err")
         print(f"MMseqs2 started searching... {kingdom}")
         logger.debug(f"exec cmd: {mmseq_search_cmd}")
         os.system(mmseq_search_cmd)
@@ -213,10 +213,10 @@ def generate_marker_scores(exp_dir, out_dir):
     generate_vog_db(out_dir,exp_dir)
     generate_fungi_db(out_dir,exp_dir)
     
-    # profile_databases = [f"{out_dir}/phrog_db/phrogdb", f"{out_dir}/vog_db/vogdb", f"{out_dir}/fungi_db/fungidb"]
-    profile_databases = [f"{out_dir}/vog_db/vogdb", f"{out_dir}/fungi_db/fungidb"]
-    # mmseqs2_kingdoms = ["phrog", "vog", "fungi"]
-    mmseqs2_kingdoms = ["vog", "fungi"]
+    profile_databases = [f"{out_dir}/phrog_db/phrogdb", f"{out_dir}/vog_db/vogdb", f"{out_dir}/fungi_db/fungidb"]
+    # profile_databases = [f"{out_dir}/vog_db/vogdb", f"{out_dir}/fungi_db/fungidb"]
+    mmseqs2_kingdoms = ["phrog", "vog", "fungi"]
+    # mmseqs2_kingdoms = ["vog", "fungi"]
     
     marker_files = ["graphk/markers/bacteria_archaea.hmm", "graphk/markers/protist.hmm"]
     marker_kingdoms = ["bacteria", "protist"]
