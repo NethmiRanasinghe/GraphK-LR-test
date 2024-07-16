@@ -206,6 +206,10 @@ def process_mmseqs_file(filenames, score_data, threshold):
 
     print(f"Dictionary updated with mmseqs .tab file results")
 
+def remove_temp_files(out_dir):
+    rm_dir_cmd = (f"rm -r {out_dir}/mmseqs2_files")
+    logger.debug(f"exec cmd: {rm_dir_cmd}")
+    os.system(rm_dir_cmd)
 
 def generate_marker_scores(exp_dir, out_dir):
     
@@ -240,6 +244,8 @@ def generate_marker_scores(exp_dir, out_dir):
     with open(output_file_path, 'w') as output_file:
         for key,value in score_data.items():
             output_file.write(f"{key.ljust(20)}\t{value['marker_gene'].ljust(20)}\t{value['score']}\t{value['kingdom']}\n")
+    
+    remove_temp_files(out_dir)
     
     
 def run(exp_dir, out_dir):
