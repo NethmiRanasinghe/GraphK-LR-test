@@ -4,7 +4,7 @@ import logging
 import subprocess
 from Bio import SeqIO
 import numpy as np
-from .steps import step1, step2, step3, step4, step1and3, step1test, step3test
+from .steps import step1, step2, step3, step4, step1and3
 from .support import evaluate
 
 logger = logging.getLogger('GraphKLR')
@@ -52,31 +52,34 @@ BIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'bin')
 OBLR_UTILS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'oblr_utils')
 
 def rename_reads(exp_dir, fastq_file):    
-    seqtk_path = os.path.join(BIN_DIR, 'seqtk')
-    subprocess.run(f"{seqtk_path} seq -A {fastq_file} | {seqtk_path} rename - read_ > {exp_dir}/reads.fasta", shell=True, check=True)
-
+    # seqtk_path = os.path.join(BIN_DIR, 'seqtk')
+    # subprocess.run(f"{seqtk_path} seq -A {fastq_file} | {seqtk_path} rename - read_ > {exp_dir}/reads.fasta", shell=True, check=True)
+    print("skip this step!")
 
 def obtain_read_ids(exp_dir):
-    subprocess.run(f"grep '>' {exp_dir}/reads.fasta > {exp_dir}/read_ids", shell=True, check=True)
-    
+    # subprocess.run(f"grep '>' {exp_dir}/reads.fasta > {exp_dir}/read_ids", shell=True, check=True)
+    print("skip this step!")
     
 def run_seq2vec(exp_dir):
     #seq2vec_path = os.path.join(BIN_DIR, 'seq2vec')
     #subprocess.run(f"{seq2vec_path} -k 4 -o {exp_dir}/4mers -f {exp_dir}/reads.fasta", shell=True, check=True)
-    subprocess.run(f"kmertools comp oligo -p csv -i {exp_dir}/reads.fasta -o {exp_dir}/4mers -k 4", shell=True, check=True)
+    #subprocess.run(f"kmertools comp oligo -p csv -i {exp_dir}/reads.fasta -o {exp_dir}/4mers -k 4", shell=True, check=True)
+    print("step skipped!")
     
 
 def run_seq2covvec(exp_dir, fastq_file):
     #subprocess.run(f"python {BIN_DIR}/seq2covvec/seq2covvec.py -k 16 -o {exp_dir}/16mers -r {fastq_file}", shell=True, check=True)
-    subprocess.run(f"kmertools cov -s 10 -c 32 -t 8 -i {fastq_file} -o {exp_dir}/16mers -k 16", shell=True, check=True)
+    # subprocess.run(f"kmertools cov -s 10 -c 32 -t 8 -i {fastq_file} -o {exp_dir}/16mers -k 16", shell=True, check=True)
+    print("step skipped!")
     
 
 def create_overlaps(exp_dir):
-    subprocess.run(f"bash {OBLR_UTILS_DIR}/buildgraph_with_chunks.sh -r {exp_dir}/reads.fasta -c 250000 -o {exp_dir}/", shell=True, check=True)
-    
+    # subprocess.run(f"bash {OBLR_UTILS_DIR}/buildgraph_with_chunks.sh -r {exp_dir}/reads.fasta -c 250000 -o {exp_dir}/", shell=True, check=True)
+    print("step skipped!")
     
 def run_step1and3(in_file, exp_dir, out_dir):
-    step1and3.run(in_file, exp_dir, out_dir)
+    # step1and3.run(in_file, exp_dir, out_dir)
+    print("step 1 and 3 skipped")
     
     
 def run_step2(exp_dir, out_dir):
@@ -86,7 +89,8 @@ def run_step2(exp_dir, out_dir):
 
 def run_step4(exp_dir, out_dir, epochs):
     #subprocess.run(f"awk 'NR%4==1 {{print substr($1,2)}}' {fastq_file} > {exp_dir}/reads_original_ids", shell=True, check=True)
-    step4.run(exp_dir, out_dir, epochs)
+    # step4.run(exp_dir, out_dir, epochs)
+    print("step 4 skipped")
     
     
 def run_eval(out_dir, groundtruth, fastq_file):
