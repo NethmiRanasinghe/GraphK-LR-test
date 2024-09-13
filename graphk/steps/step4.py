@@ -11,8 +11,8 @@ import argparse
 import os
 import pandas as pd
 from tqdm import tqdm
-
 from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 class SAGE(nn.Module):
     def __init__(self, in_channels, out_channels, num_layers, device):
@@ -126,9 +126,25 @@ def get_train_data(read_cluster):
     
     y = torch.LongTensor(read_cluster)
 
-    no_classes = len(set(read_cluster)) # removed one for the cluster mentioned as -1
-
+    no_classes = int(np.max(read_cluster)) + 1  # removed one for the cluster mentioned as -1
+    print(type(no_classes))
     return train_idx, y, no_classes
+
+
+# Load embeddings from the model inference
+def get_embeddings(model, data, subgraph_loader):
+    model.eval()
+    embeddings = []
+
+    for batch_size, n_id, adj in subgraph_loader:
+        adj = adj.to(model.device)
+        x = data.x[n_id].to(model.device)
+        with torch.no_grad():
+            _, embd = model(x, [adj])
+        embeddings.append(embd.cpu().numpy())
+
+    embeddings = np.vstack(embeddings)
+    return embeddings
 
 
 def run(exp_dir, out_dir, epochs):
@@ -143,11 +159,13 @@ def run(exp_dir, out_dir, epochs):
     edges = np.load(exp_dir +  '/edges.npy')
     features_vec = np.concatenate((comp, covg), axis=1)
     
-    out_file = out_dir + 'final_refined_bins.tsv'       
+    out_file = out_dir + 'final_refined_bins.txt'       
 
     # create dataset
     data = get_graph_data(features_vec, edges)
     train_idx, y, no_classes = get_train_data(read_cluster)
+    
+    print(updated_clusters)
 
     # sampler for training
     train_loader = NeighborSampler(data.edge_index,
@@ -168,7 +186,7 @@ def run(exp_dir, out_dir, epochs):
                                       num_workers=8)
 
     # optimizer and running device
-    device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = SAGE(data.x.shape[1], no_classes, 2, device)
     optimizer = torch.optim.Adam(
         model.parameters(), lr=0.001, weight_decay=10e-6)
@@ -184,18 +202,17 @@ def run(exp_dir, out_dir, epochs):
     losses = []
     prev_loss = 100
 
-    for epoch in tqdm(range(1, epochs + 1), desc='Training', unit='epoch'):
+    for epoch in range(1, epochs+1):
         loss = train(model, x, y, optimizer, train_loader, device)
-        dloss = prev_loss - loss
+        dloss = prev_loss-loss
         prev_loss = loss
         losses.append(loss)
-    
-        tqdm.write(f'Epoch {epoch:02d}, Loss: {loss:.4f}')
+
+        print(f'Epoch {epoch:02d}, Loss: {loss:.4f}')
 
         if loss < 0.05:
-            tqdm.write('Early stopping, loss less than 0.05')
+            print('Early stopping, loss less than 0.05')
             break
-
 
     idx, preds = predict_all(model, x, subgraph_loader)
     classes = torch.argmax(preds, axis=1)
@@ -203,3 +220,6 @@ def run(exp_dir, out_dir, epochs):
     
     # Save the predictions to the output file
     np.savetxt(out_file, classes_np, fmt='%s', delimiter='\n')
+    
+    
+    
