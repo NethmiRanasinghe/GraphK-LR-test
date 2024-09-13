@@ -1,3 +1,6 @@
+![graphk_final_logo](https://github.com/user-attachments/assets/6c358906-e89e-49aa-87df-e9775b21cedb)
+
+
 # GraphK-LR : Long-reads metagenomic bin refiner
 
 ## Dependencies
