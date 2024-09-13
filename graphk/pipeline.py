@@ -93,19 +93,31 @@ def run_pipeline(args):
         logger.info("Overlaps already created")
         
         
+    # run_graph_create
+    stage = "2_1"
+    stage_params = [exp_dir]
+
+    if checkpoint.should_run_step(stage, stage_params):
+        logger.info("Creating Graph ")
+        run_create_graph(exp_dir)
+        
+        checkpoint.log(stage, stage_params)
+        logger.info("Creating Graph complete")
+    else:
+        logger.info("Creating Graph executed")
+
     # run_step1
     stage = "2_1"
-    stage_params = [in_file, exp_dir, out_dir]
+    stage_params = [exp_dir, in_file, out_dir]
 
     if checkpoint.should_run_step(stage, stage_params):
         logger.info("Running step 1 ")
-        run_step1and3(in_file, exp_dir, out_dir)
+        run_step1(exp_dir, in_file, out_dir)
         
         checkpoint.log(stage, stage_params)
         logger.info("Running step 1 complete")
     else:
-        logger.info("Step1 already executed")
-        
+        logger.info("Step1 already executed")        
 
     # run_step2
     stage = "2_2"
@@ -119,6 +131,19 @@ def run_pipeline(args):
         logger.info("Running step 2 complete")
     else:
         logger.info("Step2 already executed")
+
+    # run_step3
+    stage = "2_1"
+    stage_params = [exp_dir, out_dir]
+
+    if checkpoint.should_run_step(stage, stage_params):
+        logger.info("Running step 3 ")
+        run_step3(exp_dir, out_dir)
+        
+        checkpoint.log(stage, stage_params)
+        logger.info("Running step 3 complete")
+    else:
+        logger.info("Step3 already executed")
 
 
     # run_seq2covvec
